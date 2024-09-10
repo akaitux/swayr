@@ -1,3 +1,8 @@
+next
+=============
+
+- New workspace=__visible__ criterion.
+
 swayr v0.27.0
 =============
 
