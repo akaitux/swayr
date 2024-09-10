@@ -26,6 +26,13 @@ pub enum RegexOrFocused {
 }
 
 #[derive(Debug)]
+pub enum RegexOrFocusedOrVisible {
+    Regex(Regex),
+    Focused,
+    Visible,
+}
+
+#[derive(Debug)]
 pub enum I64OrFocused {
     I64(i64),
     Focused,
@@ -54,7 +61,7 @@ pub enum Criterion {
     ConMark(Regex),
     ConId(I64OrFocused),
     Pid(i32),
-    Workspace(RegexOrFocused),
+    Workspace(RegexOrFocusedOrVisible),
     Shell(ShellTypeOrFocused),
     Floating,
     Tiling,
@@ -83,6 +90,10 @@ peg::parser! {
         rule regex_or_focused() -> RegexOrFocused =
             "__focused__" { RegexOrFocused::Focused }
           / s:string_literal() { RegexOrFocused::Regex(regex_from_str(&s)) }
+        rule regex_or_focused_or_visible() -> RegexOrFocusedOrVisible =
+            "__focused__" { RegexOrFocusedOrVisible::Focused }
+          / "__visible__" { RegexOrFocusedOrVisible::Visible }
+          / s:string_literal() { RegexOrFocusedOrVisible::Regex(regex_from_str(&s)) }
 
         rule i64_focused() -> I64OrFocused =
             "__focused__" { I64OrFocused::Focused }
@@ -108,7 +119,7 @@ peg::parser! {
         rule pid() -> Criterion = "pid" space() "=" space()
             n:i32_literal() { Criterion::Pid(n) }
         rule workspace() -> Criterion = "workspace" space() "=" space()
-            rof:regex_or_focused() { Criterion::Workspace(rof) }
+            rof:regex_or_focused_or_visible() { Criterion::Workspace(rof) }
         rule shell_type_or_focused() -> ShellTypeOrFocused =
             "\"xdg_shell\"" {ShellTypeOrFocused::ShellType(s::ShellType::XdgShell)}
           / "\"xwayland\""  {ShellTypeOrFocused::ShellType(s::ShellType::Xwayland)}
@@ -263,14 +274,14 @@ fn eval_criterion<'a>(
         Criterion::ConMark(rx) => w.node.marks.iter().any(|m| rx.is_match(m)),
         Criterion::Pid(pid) => w.node.pid == Some(*pid),
         Criterion::Workspace(val) => match val {
-            RegexOrFocused::Regex(rx) => {
+            RegexOrFocusedOrVisible::Regex(rx) => {
                 let ws_name = w
                     .tree
                     .get_parent_node_of_type(w.node.id, ipc::Type::Workspace)
                     .map(|ws| ws.get_name().to_owned());
                 is_some_and_rx_matches(ws_name.as_ref(), rx)
             }
-            RegexOrFocused::Focused => match focused {
+            RegexOrFocusedOrVisible::Focused => match focused {
                 Some(win) => are_some_and_equal(
                     w.tree.get_parent_node_of_type(
                         w.node.id,
@@ -283,6 +294,22 @@ fn eval_criterion<'a>(
                 ),
                 None => false,
             },
+            RegexOrFocusedOrVisible::Visible => {
+                if let Some(ws) = w
+                    .tree
+                    .get_parent_node_of_type(w.node.id, ipc::Type::Workspace)
+                {
+                    if let Some(output) =
+                        w.tree.get_parent_node_of_type(ws.id, ipc::Type::Output)
+                    {
+                        return output
+                            .focus
+                            .first()
+                            .is_some_and(|&visible| visible == ws.id);
+                    }
+                }
+                false
+            }
         },
         Criterion::Floating => w.node.is_floating(),
         Criterion::Tiling => !w.node.is_floating(),

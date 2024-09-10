@@ -268,7 +268,7 @@ Swayr supports most of the criteria querys defined by Sway, see section
 * `class=<regex | __focused__>` 
 * `instance=<regex | __focused__>`
 * `title=<regex | __focused__>`
-* `workspace=<regex | __focused__>`
+* `workspace=<regex | __focused__ | __visible__ >`
 * `con_mark=<regex>`
 * `con_id=<uint | __focused__>`
 * `shell=<"xdg_shell" | "xwayland" | __focused__>`
