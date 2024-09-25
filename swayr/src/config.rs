@@ -279,6 +279,7 @@ impl Default for Menu {
             executable: Some("wofi".to_string()),
             args: Some(vec![
                 "--show=dmenu".to_string(),
+                "--define=layer=overlay".to_string(),
                 "--allow-markup".to_string(),
                 "--allow-images".to_string(),
                 "--insensitive".to_string(),
