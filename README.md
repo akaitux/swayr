@@ -427,6 +427,7 @@ The default config looks like this:
 executable = 'wofi'
 args = [
     '--show=dmenu',
+    '--define=layer=overlay',
     '--allow-markup',
     '--allow-images',
     '--insensitive',
