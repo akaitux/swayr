@@ -716,7 +716,9 @@ Right now, there are the following modules:
    health](https://en.wikipedia.org/wiki/State_of_health).
 4. The `date` module can show, you guess it, the current date and time!
 5. The `pactl` module can show the current volume percentage and muted state.
-   Clicks can increase/decrease the volume or toggle the mute state.
+   Clicks can increase/decrease the volume or toggle the mute state.  It
+   requires PulseAudio and can also control PipeWire if the pipewire-pulse
+   adapter library is installed.
 6. The `wpctl` module can show the current volume percentage and muted state.
    Clicks can increase/decrease the volume or toggle the mute state. It
    requires PipeWire.

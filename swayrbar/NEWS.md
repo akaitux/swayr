@@ -1,3 +1,9 @@
+swayrbar 0.4.1
+==============
+
+- New `wpctl` module (similar to the `pactl` module) for adjusting volume of
+  the default source and sink using `wpctl` (from PipeWire).
+
 swayrbar 0.4.0
 ==============
 
