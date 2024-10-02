@@ -212,7 +212,7 @@ These commands change the layout of the current workspace.
   between a tabbed and tiled layout, i.e., it calls `shuffle-tile-workspace` if
   it is currently tabbed, and calls `shuffle-tile-workspace` if it is currently
   tiled.
-  
+
 #### Scripting commands
 
 * `get-windows-as-json` returns a JSON containing all windows, possibly with
@@ -265,7 +265,7 @@ These commands change the layout of the current workspace.
 Swayr supports most of the criteria querys defined by Sway, see section
 `CRITERIA` in `man sway(5)`.  Right now, these are:
 * `app_id=<regex | __focused__>`
-* `class=<regex | __focused__>` 
+* `class=<regex | __focused__>`
 * `instance=<regex | __focused__>`
 * `title=<regex | __focused__>`
 * `workspace=<regex | __focused__ | __visible__ >`
@@ -276,7 +276,7 @@ Swayr supports most of the criteria querys defined by Sway, see section
 * `floating`
 * `tiling`
 * `app_name=<regex | __focused__>` (not in sway!)
-  
+
 The last criterion `app_name` is matched against the application's name which
 can either be `app_id`, `window_properties.class`, or
 `window_properties.instance` (whatever is filled).
@@ -717,9 +717,12 @@ Right now, there are the following modules:
 4. The `date` module can show, you guess it, the current date and time!
 5. The `pactl` module can show the current volume percentage and muted state.
    Clicks can increase/decrease the volume or toggle the mute state.
-6. The `nmcli` module uses NetworkManager's `nmcli` command line tool to show
+6. The `wpctl` module can show the current volume percentage and muted state.
+   Clicks can increase/decrease the volume or toggle the mute state. It
+   requires PipeWire.
+7. The `nmcli` module uses NetworkManager's `nmcli` command line tool to show
    the currently connected wifi and its signal strength.
-7. The `iwctl` module the `iwctl` command line tool to show the currently
+8. The `iwctl` module the `iwctl` command line tool to show the currently
    connected wifi and its signal strength.
 
 
@@ -888,6 +891,23 @@ to be installed.  It supports the following placeholders:
 
 By default, it has the following click bindings:
 * `Left` calls the `pavucontrol` program (PulseAudio GUI control).
+* `Right` toggles the default sink's mute state.
+* `WheelUp` and `WheelDown` increase/decrease the volume of the default sink.
+
+
+#### The `wpctl` module
+
+The `wpctl` module requires the pipewire command line tool of the same name
+to be installed.  It supports the following placeholders:
+* `{volume}` is the current volume percentage of the default sink.
+* `{muted}` is the string `" muted"` if the default sink is currently muted,
+  otherwise it is the empty string.
+* `{volume_source}` is the current volume percentage of the default source.
+* `{muted_source}` is the string `" muted"` if the default source is currently
+  muted, otherwise it is the empty string.
+
+By default, it has the following click bindings:
+* `Left` executes `foot watch wpctl status` (monitor PipeWire objects).
 * `Right` toggles the default sink's mute state.
 * `WheelUp` and `WheelDown` increase/decrease the volume of the default sink.
 

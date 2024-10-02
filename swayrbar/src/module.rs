@@ -23,6 +23,7 @@ pub mod battery;
 pub mod cmd;
 pub mod date;
 pub mod pactl;
+pub mod wpctl;
 pub mod sysinfo;
 pub mod wifi;
 pub mod window;

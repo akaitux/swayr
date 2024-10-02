@@ -97,6 +97,7 @@ fn create_modules(config: config::Config) -> Vec<Box<dyn BarModuleFn>> {
             "battery" => module::battery::create(mc),
             "date" => module::date::create(mc),
             "pactl" => module::pactl::create(mc),
+            "wpctl" => module::wpctl::create(mc),
             "nmcli" => module::wifi::create(module::wifi::WifiTool::Nmcli, mc),
             "iwctl" => module::wifi::create(module::wifi::WifiTool::Iwctl, mc),
             "cmd" => module::cmd::create(mc),
