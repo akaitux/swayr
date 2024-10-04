@@ -52,10 +52,12 @@ fn run_wpctl(args: &[&str]) -> String {
 fn get_volume(device: &str) -> (u8, bool) {
     let output = run_wpctl(&["get-volume", device]);
     let mut volume = String::new();
-    VOLUME_RX
-        .captures(&output)
-        .unwrap()
-        .expand("$num$frac", &mut volume);
+    if !output.is_empty() {
+        VOLUME_RX
+            .captures(&output)
+            .unwrap()
+            .expand("$num$frac", &mut volume);
+    }
     (volume.parse::<u8>().unwrap_or(255_u8), output.contains("[MUTED]"))
 }
 
