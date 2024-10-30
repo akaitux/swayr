@@ -79,6 +79,8 @@ pub enum ConsiderWindows {
 pub struct SkipFlags {
     #[clap(short = 'u', long, help = "Skip urgent windows")]
     skip_urgent: bool,
+    #[clap(short = 'w', long, help = "Only windows from current workspace")]
+    skip_another_workspaces: bool,
     #[clap(
         short = 'l',
         long,
@@ -386,6 +388,7 @@ pub struct SwitchToMatchingData {
     lru: Option<i64>,
     origin: Option<i64>,
     skip_urgent: bool,
+    skip_another_workspaces: bool,
     skip_lru: bool,
     skip_lru_if_current_doesnt_match: bool,
     skip_origin: bool,
@@ -398,6 +401,7 @@ impl SwitchToMatchingData {
         self.origin = None;
         if reset_skip_flags {
             self.skip_urgent = false;
+            self.skip_another_workspaces = false;
             self.skip_lru = false;
             self.skip_lru_if_current_doesnt_match = false;
             self.skip_origin = false;
@@ -410,6 +414,7 @@ impl SwitchToMatchingData {
             lru: None,
             origin: None,
             skip_urgent: false,
+            skip_another_workspaces: false,
             skip_lru: false,
             skip_lru_if_current_doesnt_match: false,
             skip_origin: false,
@@ -669,6 +674,7 @@ fn exec_swayr_cmd_1(
                         skip_urgent: false,
                         skip_lru: false,
                         skip_lru_if_current_doesnt_match: false,
+                        skip_another_workspaces: false,
                         skip_origin: false,
                     },
                 },
@@ -762,6 +768,7 @@ fn init_switch_to_matching_data(
     switch_to_matching_data.skip_lru_if_current_doesnt_match =
         skip_flags.skip_lru_if_current_doesnt_match;
     switch_to_matching_data.skip_origin = skip_flags.skip_origin;
+    switch_to_matching_data.skip_another_workspaces = skip_flags.skip_another_workspaces;
 }
 
 fn get_matching_windows<'a>(
@@ -973,7 +980,20 @@ pub fn switch_to_urgent_or_lru_window(
 ) -> Result<String, String> {
     let root = ipc::get_root_node(false);
     let tree = t::get_tree(&root);
-    let wins = tree.get_windows(fdata);
+    let mut wins = tree.get_windows(fdata);
+
+    if stm_data.skip_another_workspaces {
+        if let Some(current) = tree.get_current_workspace() {
+           wins.retain(|w| {
+                match tree.get_parent_node_of_type(w.node.id, ipc::Type::Workspace)
+                {
+                    Some(ws) => &current.id == &ws.id,
+                    None => true,
+                }
+            })
+        }
+    }
+
     focus_urgent_or_matching_or_lru_window(
         &wins,
         fdata,
@@ -1177,7 +1197,19 @@ fn switch_to_matching_or_urgent_or_lru_window(
 ) -> Result<String, String> {
     let root = ipc::get_root_node(false);
     let tree = t::get_tree(&root);
-    let wins = tree.get_windows(fdata);
+    let mut wins = tree.get_windows(fdata);
+
+    if switch_to_matching_data.skip_another_workspaces {
+        if let Some(current) = tree.get_current_workspace() {
+           wins.retain(|w| {
+                match tree.get_parent_node_of_type(w.node.id, ipc::Type::Workspace)
+                {
+                    Some(ws) => &current.id == &ws.id,
+                    None => true,
+                }
+            })
+        }
+    }
 
     let crit = criteria::parse_criteria(criteria)?;
     let pred = criteria::criterion_to_predicate(&crit, &wins);
